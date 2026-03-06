@@ -26,24 +26,63 @@ std::vector<std::vector<int>> edge_list;
 
 void build_adj_matrix()
 {
-    
+    adj.assign(total_nodes, vector<int>(total_nodes, 0));
+
+    for (auto &edge : edge_list)
+    {
+        int source = edge[0];
+        int target = edge[1];
+        adj[target][source] = 1;  
+    }
 }
 
 double calculate_fraction_of_ones()
 {
-   
+   int count = 0;
+    for (int op : opinions)
+    {
+        if (op == 1) count++;
+    }
+    return (double)count / total_nodes;
 }
 
 // For a given node, count majority opinion among its neighbours. Tie -> 0.
 int get_majority_friend_opinions(int node)
 {
+     int ones = 0;
+    int zeros = 0;
 
+    for (int j = 0; j < total_nodes; j++)
+    {
+        if (adj[node][j] == 1)   // j 影响 node
+        {
+            if (opinions[j] == 1) ones++;
+            else zeros++;
+        }
+    }
+
+    if (ones > zeros) return 1;
+    else return 0;  // tie -> 0
 }
 
 // Calculate new opinions for all voters and return if anyone's opinion changed
 bool update_opinions()
 {
+    vector<int> new_opinions = opinions;
+    bool changed = false;
 
+    for (int i = 0; i < total_nodes; i++)
+    {
+        int majority = get_majority_friend_opinions(i);
+        if (majority != opinions[i])
+        {
+            new_opinions[i] = majority;
+            changed = true;
+        }
+    }
+
+    opinions = new_opinions;
+    return changed;
 }
 
 int main() {
